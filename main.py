@@ -1,3 +1,4 @@
+import sys; args = sys.argv[1:]
 import pandas as pd
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -45,21 +46,32 @@ def test_model(df):
     pipeline, input_test, output_test = prepare_model(df)
     output_predictions = pipeline.predict(input_test)
     
-    print(output_predictions)
-
+    print(f"Accuracy: {accuracy_score(output_test, output_predictions):.2%}")
+    
+def test_specific_message(df, input_message):
+    pipeline, input_test, output_test = prepare_model(df)
+    output_prediction = pipeline.predict([input_message])[0]
+    output_prediction_string = ""
+    if output_prediction == 0: output_prediction_string = "NOT spam"
+    else: output_prediction_string = "SPAM"
+    print("Model predicts message \"" + input_message + "\" is", output_prediction_string)
 
 def main():
     
     df = pd.read_csv('/Users/ryanfriess/Desktop/projects/spam-classification/data/messages.csv')
-    # print(df["Category"])
+
 
     df.columns = [col.lower() for col in df.columns]
 
-    # print(df.columns)
-    # label_list = []
-    # for label in df["Category"]:
-    #     label_list.append(label)
     
     test_model(df)
+    if(args):
+        test_specific_message(df, "".join(args))
+    else:
+        while True:
+            message = input('What is your text you want to check? (-1 to quit)\n')
+            if message == "-1": break
+            test_specific_message(df, message)
+        
     
 main()
